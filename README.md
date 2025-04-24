@@ -18,4 +18,3 @@ This application is designed to manage:
 
 ## 📂 Folder Structure
 
->>>>>>> feature/setup-project-structure
