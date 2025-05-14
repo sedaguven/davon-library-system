@@ -1,26 +1,67 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f9fafb;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 480px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+.error {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.success {
+  color: #16a34a;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+th {
+  background-color: #f3f4f6;
+  text-align: left;
+}
+
+button.small {
+  padding: 6px 12px;
+  font-size: 0.85rem;
 }
