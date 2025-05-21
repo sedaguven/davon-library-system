@@ -1,55 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Davon Library</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Davon Library System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
   <header>
-    <h1>📚 Davon Library</h1>
-    <nav>
-      <a href="#">Home</a>
-      <a href="#">Features</a>
-      <a href="#">Contact</a>
-    </nav>
+    <div class="container">
+      <div class="logo">
+        <span class="logo-icon"><i class="fas fa-book-open"></i></span>
+        <h1>Davon Library</h1>
+      </div>
+      <nav>
+        <a href="#" class="active">Home</a>
+        <a href="#features">Features</a>
+        <a href="#testimonials">Testimonials</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="cta-buttons">
+        <a href="#" class="btn btn-secondary">Log In</a>
+        <a href="#" class="btn btn-primary">Get Started</a>
+      </div>
+      <button class="mobile-menu-btn" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
   </header>
 
   <section class="hero">
-    <h2>Your library, smarter.</h2>
-    <p>Explore books, manage members, and track lending seamlessly.</p>
-  </section>
-
-  <section class="features">
-    <h3>Key Features</h3>
-    <ul>
-      <li>📖 Book search and categorization</li>
-      <li>🧑‍💼 Member management</li>
-      <li>📊 Lending dashboard</li>
-    </ul>
-  </section>
-
-  <section class="stats">
-    <div class="stat-card">
-      <h3>10,000+</h3>
-      <p>Books in Collection</p>
-    </div>
-    <div class="stat-card">
-      <h3>5,000+</h3>
-      <p>Active Members</p>
-    </div>
-    <div class="stat-card">
-      <h3>99%</h3>
-      <p>Satisfaction Rate</p>
+    <div class="container">
+      <div class="hero-content">
+        <h2>Modern Library Management<br>Made Simple</h2>
+        <p>Streamline your library operations with our comprehensive digital solution designed for libraries of all sizes.</p>
+        <div class="hero-cta">
+          <a href="#" class="btn btn-primary btn-large">Start Free Trial</a>
+          <a href="#" class="btn btn-outline">Watch Demo <i class="fas fa-play-circle"></i></a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" alt="Library Management System">
+      </div>
     </div>
   </section>
 
-  <footer>
-    <p>Contact: support@davonlibrary.com</p>
-    <p>© 2025 Davon Library</p>
+  <section id="stats" class="stats">
+    <div class="container">
+      <div class="stat-card">
+        <i class="fas fa-book"></i>
+        <h3>25,000+</h3>
+        <p>Books Managed</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <h3>10,000+</h3>
+        <p>Active Members</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-building"></i>
+        <h3>500+</h3>
+        <p>Libraries Served</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-check-circle"></i>
+        <h3>99.9%</h3>
+        <p>Uptime Reliability</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Powerful Features</h2>
+        <p>Everything you need to run your library efficiently</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>Smart Catalog</h3>
+          <p>Advanced search and filtering options to find any book instantly.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3>Member Management</h3>
+          <p>Easily register and manage library members with custom profiles.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-exchange-alt"></i>
+          </div>
+          <h3>Circulation Control</h3>
+          <p>Streamline checkouts, returns, and reservations with a few clicks.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Analytics Dashboard</h3>
+          <p>Gain insights into library usage and optimize your collection.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <h3>Notifications</h3>
+          <p>Automated reminders for due dates and available reservations.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <h3>Mobile Access</h3>
+          <p>Access your library system from any device, anywhere, anytime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="testimonials" class="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <h2>Trusted by Librarians</h2>
+        <p>See what our users have to say</p>
+      </div>
+      <div class="testimonial-slider">
+        <div class="testimonial">
+          <div class="testimonial-content">
+            <p>"The Davon Library System has transformed how we manage our collection. Searching for books and managing loans has never been easier."</p>
+          </div>
+          <div class="testimonial-author">
+            <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sarah Johnson">
+            <div>
+              <h4>Sarah Johnson</h4>
+              <p>Head Librarian, Central Library</p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-content">
+            <p>"We've reduced our administrative work by 70% since implementing Davon. The automated notifications alone have saved us countless hours."</p>
+          </div>
+          <div class="testimonial-author">
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen">
+            <div>
+              <h4>Michael Chen</h4>
+              <p>Library Director, University of Learning</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="pricing">
+    <div class="container">
+      <div class="section-header">
+        <h2>Simple, Transparent Pricing</h2>
+        <p>Choose the plan that's right for your library</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Starter</h3>
+            <div class="price">$49<span>/month</span></div>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i> Up to 5,000 books</li>
+            <li><i class="fas fa-check"></i> 500 member accounts</li>
+            <li><i class="fas fa-check"></i> Basic reporting</li>
+            <li><i class="fas fa-check"></i> Email support</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Get Started</a>
+        </div>
+        <div class="pricing-card popular">
+          <div class="popular-badge">Most Popular</div>
+          <div class="pricing-header">
+            <h3>Professional</h3>
+            <div class="price">$99<span>/month</span></div>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i> Up to 20,000 books</li>
+            <li><i class="fas fa-check"></i> 2,000 member accounts</li>
+            <li><i class="fas fa-check"></i> Advanced analytics</li>
+            <li><i class="fas fa-check"></i> Priority support</li>
+            <li><i class="fas fa-check"></i> Custom branding</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Get Started</a>
+        </div>
+        <div class="pricing-card">
+          <div class="pricing-header">
+            <h3>Enterprise</h3>
+            <div class="price">Custom</div>
+          </div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i> Unlimited books</li>
+            <li><i class="fas fa-check"></i> Unlimited members</li>
+            <li><i class="fas fa-check"></i> Custom integrations</li>
+            <li><i class="fas fa-check"></i> 24/7 dedicated support</li>
+            <li><i class="fas fa-check"></i> On-site training</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cta" class="cta">
+    <div class="container">
+      <h2>Ready to transform your library?</h2>
+      <p>Join thousands of libraries that trust Davon Library System</p>
+      <a href="#" class="btn btn-primary btn-large">Start Your Free Trial</a>
+      <p class="no-credit-card">No credit card required</p>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-column">
+          <div class="footer-logo">
+            <i class="fas fa-book-open"></i>
+            <h3>Davon Library</h3>
+          </div>
+          <p>Empowering libraries with modern technology since 2015.</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Integrations</a></li>
+            <li><a href="#">Updates</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">Tutorials</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2023 Davon Library System. All rights reserved.</p>
+      </div>
+    </div>
   </footer>
 
+  <script>
+    // Simple mobile menu toggle
+    document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+      document.querySelector('nav').classList.toggle('active');
+    });
+  </script>
 </body>
 </html>

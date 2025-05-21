@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puppeteer Demo | Website Screenshot Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #6a11cb;
+      --secondary-color: #2575fc;
+      --dark-color: #343a40;
+      --light-color: #f8f9fa;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      min-height: 100vh;
+      color: var(--light-color);
+    }
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    .hero {
+      padding: 6rem 0;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    .screenshot-container {
+      background-color: white;
+      border-radius: 15px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .screenshot-img {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .feature-icon {
+      height: 5rem;
+      width: 5rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-custom {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+    }
+    .btn-custom:hover {
+      background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <i class="fas fa-robot me-2"></i>
+        <span>PuppeteerDemo</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#features">Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#demo">Demo</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/puppeteer/puppeteer" target="_blank">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Puppeteer Screenshot Demo</h1>
+      <p class="lead mb-5">Automate browser actions and generate website screenshots with Puppeteer</p>
+      <a href="#demo" class="btn btn-custom btn-lg">Try It Now</a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-5" id="features">
+    <div class="container">
+      <h2 class="text-center mb-5">Puppeteer Features</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 p-4">
+            <div class="feature-icon mx-auto">
+              <i class="fas fa-camera"></i>
+            </div>
+            <h3 class="text-center text-dark">Screenshot Generation</h3>
+            <p class="text-center text-muted">Capture full-page screenshots of any website automatically.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 p-4">
+            <div class="feature-icon mx-auto">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <h3 class="text-center text-dark">Browser Automation</h3>
+            <p class="text-center text-muted">Automate form filling, navigation, and user interactions.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 p-4">
+            <div class="feature-icon mx-auto">
+              <i class="fas fa-code"></i>
+            </div>
+            <h3 class="text-center text-dark">Headless Mode</h3>
+            <p class="text-center text-muted">Run Chrome without a GUI for faster performance in production.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section class="py-5 bg-light" id="demo">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <div class="card p-4">
+            <h2 class="text-center text-dark mb-4">Take a Website Screenshot</h2>
+            <div class="mb-3">
+              <label for="urlInput" class="form-label text-dark">Enter Website URL</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                <input type="url" class="form-control" id="urlInput" placeholder="https://example.com" required>
+              </div>
+            </div>
+            <div class="d-grid">
+              <button id="captureBtn" class="btn btn-custom">Capture Screenshot</button>
+            </div>
+            
+            <div class="loading" id="loadingSpinner">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-dark">Capturing screenshot...</p>
+            </div>
+            
+            <div class="mt-4" id="resultContainer">
+              <img id="screenshotImg" class="screenshot-img" alt="Website Screenshot">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-4 bg-dark">
+    <div class="container">
+      <p class="text-center text-white mb-0">
+        Built with Node.js, Express, and Puppeteer &copy; 2023
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlInput = document.getElementById('urlInput');
+      const captureBtn = document.getElementById('captureBtn');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const screenshotImg = document.getElementById('screenshotImg');
+      
+      captureBtn.addEventListener('click', async function() {
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+          alert('Please enter a valid URL');
+          return;
+        }
+        
+        try {
+          // Show loading spinner
+          loadingSpinner.style.display = 'block';
+          screenshotImg.style.display = 'none';
+          
+          // Send request to server
+          const response = await fetch('/screenshot', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Display the screenshot
+            screenshotImg.src = data.filename + '?t=' + data.timestamp;
+            screenshotImg.style.display = 'block';
+          } else {
+            alert('Error: ' + data.error);
+          }
+        } catch (error) {
+          alert('Failed to capture screenshot: ' + error.message);
+        } finally {
+          // Hide loading spinner
+          loadingSpinner.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

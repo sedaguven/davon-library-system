@@ -1,0 +1,13 @@
+{
+  "name": "puppeteer-landing-page",
+  "version": "1.0.0",
+  "description": "A landing page demonstrating Puppeteer capabilities",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "puppeteer": "^22.0.0"
+  }
+} 

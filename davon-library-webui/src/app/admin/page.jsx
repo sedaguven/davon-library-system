@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 function validateEmail(email) {
-  return /^[^\s@]+@[\w.-]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export default function AdminPage() {
@@ -101,7 +101,10 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex items-center justify-center">
       <div className="w-full max-w-2xl bg-gray-800 p-8 rounded-xl shadow-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">Admin Panel</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold text-center">Admin Panel</h1>
+          <a href="/profile" className="py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white transition">Profile</a>
+        </div>
         {message && <div className="mb-4 p-2 bg-green-600/80 rounded text-white text-center">{message}</div>}
         {error && <div className="mb-4 p-2 bg-red-600/80 rounded text-white text-center">{error}</div>}
         {users.length === 0 ? (
@@ -119,27 +122,41 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user, i) => (
-                  <tr key={user.email} className="even:bg-gray-700/40">
-                    {editIndex === i ? (
-                      <>
-                        <td className="px-2 py-1"><input name="username" value={editUser.username} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required /></td>
-                        <td className="px-2 py-1"><input name="email" value={editUser.email} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required /></td>
-                        <td className="px-2 py-1"><input name="password" value={editUser.password} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required /></td>
-                        <td className="px-2 py-1"><select name="role" value={editUser.role} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="user">user</option><option value="admin">admin</option></select></td>
-                        <td className="px-2 py-1 flex gap-2"><button onClick={() => saveEdit(i)} disabled={!editUser.username.trim() || !editUser.email.trim() || !editUser.password.trim() || !validateEmail(editUser.email)} className="flex-1 py-1 bg-blue-600 hover:bg-blue-700 transition rounded-lg font-semibold">Save</button><button onClick={() => setEditIndex(null)} className="flex-1 py-1 bg-gray-600 hover:bg-gray-700 transition rounded-lg font-semibold">Cancel</button></td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-2 py-1">{user.username}</td>
-                        <td className="px-2 py-1">{user.email}</td>
-                        <td className="px-2 py-1">{user.password}</td>
-                        <td className="px-2 py-1">{user.role}</td>
-                        <td className="px-2 py-1 flex gap-2"><button onClick={() => startEdit(i)} className="flex-1 py-1 bg-blue-600 hover:bg-blue-700 transition rounded-lg font-semibold">Edit</button><button onClick={() => deleteUser(user.email)} className="flex-1 py-1 bg-red-600 hover:bg-red-700 transition rounded-lg font-semibold">Delete</button></td>
-                      </>
-                    )}
-                  </tr>
-                ))}
+                {users.map((user, i) => {
+                  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                  const isSelf = currentUser && currentUser.email === user.email;
+                  return (
+                    <tr key={user.email} className="even:bg-gray-700/40">
+                      {editIndex === i ? (
+                        <>
+                          <td className="px-2 py-1"><input name="username" value={editUser.username} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required /></td>
+                          <td className="px-2 py-1"><input name="email" value={editUser.email} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required /></td>
+                          <td className="px-2 py-1"><input name="password" value={editUser.password} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required /></td>
+                          <td className="px-2 py-1"><select name="role" value={editUser.role} onChange={handleEditChange} className="w-full px-2 py-1 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="user">user</option><option value="admin">admin</option></select></td>
+                          <td className="px-2 py-1 flex gap-2"><button onClick={() => saveEdit(i)} disabled={!editUser.username.trim() || !editUser.email.trim() || !editUser.password.trim() || !validateEmail(editUser.email)} className="flex-1 py-1 bg-blue-600 hover:bg-blue-700 transition rounded-lg font-semibold">Save</button><button onClick={() => setEditIndex(null)} className="flex-1 py-1 bg-gray-600 hover:bg-gray-700 transition rounded-lg font-semibold">Cancel</button></td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-2 py-1">{user.username}</td>
+                          <td className="px-2 py-1">{user.email}</td>
+                          <td className="px-2 py-1">{user.password}</td>
+                          <td className="px-2 py-1">{user.role}</td>
+                          <td className="px-2 py-1 flex gap-2">
+                            <button onClick={() => startEdit(i)} className="flex-1 py-1 bg-blue-600 hover:bg-blue-700 transition rounded-lg font-semibold">Edit</button>
+                            <button
+                              onClick={() => !isSelf && deleteUser(user.email)}
+                              className={`flex-1 py-1 ${isSelf ? 'bg-gray-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'} transition rounded-lg font-semibold`}
+                              disabled={isSelf}
+                              title={isSelf ? "You can't delete yourself" : "Delete"}
+                            >
+                              {isSelf ? "Can't Delete" : "Delete"}
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

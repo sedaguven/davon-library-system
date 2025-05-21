@@ -69,6 +69,13 @@ export default function RegisterPage() {
       setEmail("");
       setPassword("");
       setSuccess("✅ User registered successfully!");
+      // Set as current user and redirect if role is user
+      if (newUser.role === 'user') {
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 1200);
+      }
     } catch (error) {
       setError('An error occurred during registration. Please try again.');
       console.error('Registration error:', error);

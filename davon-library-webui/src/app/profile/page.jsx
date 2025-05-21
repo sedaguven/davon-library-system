@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 function validateEmail(email) {
-  return /^[^\s@]+@[\w.-]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export default function ProfilePage() {
