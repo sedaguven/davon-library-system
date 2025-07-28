@@ -1,0 +1,94 @@
+@startuml Library System - Core Use Cases
+
+!theme aws-orange
+left to right direction
+
+' ==== MAIN ACTORS ====
+
+actor "Library Member" as Member #lightblue
+actor "Library Staff" as Staff #lightgreen  
+actor "System Admin" as Admin #orange
+
+' ==== CORE USE CASES ====
+
+package "Core Library Operations" {
+  
+  ' Member Operations
+  usecase "Search Books" as Search
+  usecase "Borrow Book Copy" as Borrow
+  usecase "Return Book Copy" as Return
+  usecase "Reserve Book" as Reserve
+  usecase "View My Loans" as ViewLoans
+  
+  ' Staff Operations  
+  usecase "Process Checkout" as Checkout
+  usecase "Process Return" as ProcessReturn
+  usecase "Register Member" as RegisterMember
+  usecase "Scan Barcode" as ScanBarcode
+  
+  ' Admin Operations
+  usecase "Add New Book" as AddBook
+  usecase "Add Book Copy" as AddCopy
+  usecase "Manage Staff" as ManageStaff
+  usecase "Manage Library" as ManageLibrary
+}
+
+' ==== RELATIONSHIPS ====
+
+' Member actions
+Member --> Search
+Member --> Borrow  
+Member --> Return
+Member --> Reserve
+Member --> ViewLoans
+
+' Staff actions  
+Staff --> Checkout
+Staff --> ProcessReturn
+Staff --> RegisterMember
+Staff --> Search
+
+' Admin actions
+Admin --> AddBook
+Admin --> AddCopy
+Admin --> ManageStaff
+Admin --> ManageLibrary
+Admin --> Search
+
+' ==== INCLUDE RELATIONSHIPS ====
+
+Borrow ..> ScanBarcode : <<include>>
+Return ..> ScanBarcode : <<include>>
+Checkout ..> ScanBarcode : <<include>>
+ProcessReturn ..> ScanBarcode : <<include>>
+
+Borrow ..> Search : <<include>>
+Reserve ..> Search : <<include>>
+
+AddCopy ..> AddBook : <<include>>
+
+' ==== KEY NOTES ====
+
+note top of Borrow
+🎯 **REALISTIC DESIGN**
+Users borrow specific BookCopy
+(with unique barcode) not 
+abstract Book concepts
+end note
+
+note right of ScanBarcode  
+📱 **BARCODE REQUIRED**
+All physical operations
+require scanning book
+copy barcodes: BC-001
+end note
+
+note bottom of Search
+📚 **SMART SEARCH**
+Shows books AND available
+copies with locations:
+"Harry Potter - Copy HP-001 
+at Downtown, Shelf A-15"
+end note
+
+@enduml 

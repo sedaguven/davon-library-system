@@ -1,0 +1,28 @@
+@startuml
+' Entities
+class User {
+    +id: number
+    +username: string
+    +email: string
+    +password: string
+    +createdAt: string
+    +role: string
+}
+
+' Pages/Components
+class RegisterPage
+class LoginPage
+class ProfilePage
+class AdminPage
+
+' Storage
+class LocalStorage
+
+' Relationships
+RegisterPage --> User : creates
+LoginPage --> User : authenticates
+ProfilePage --> User : edits/deletes
+AdminPage --> User : manages
+User ..> LocalStorage : stored in
+
+@enduml

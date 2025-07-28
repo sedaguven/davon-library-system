@@ -1,0 +1,109 @@
+@startuml Library System - Core Entities
+
+!theme aws-orange
+
+' ==== CORE ENTITIES ====
+
+class User {
+  -id: Long
+  -firstName: String
+  -lastName: String  
+  -email: String
+  -registrationDate: LocalDateTime
+  --
+  +getFullName(): String
+  +canBorrowBooks(): boolean
+  +getCurrentLoanCount(): long
+}
+
+class Library {
+  -id: Long
+  -name: String
+  -address: String
+  -city: String
+  -isActive: Boolean
+  --
+  +isCurrentlyOpen(): boolean
+  +getAvailableBooks(): List<Book>
+}
+
+class Book {
+  -id: Long
+  -title: String
+  -isbn: String
+  -availableCopies: Integer
+  -totalCopies: Integer
+  --
+  +isAvailable(): boolean
+  +borrowCopy(): boolean
+  +returnCopy(): void
+}
+
+class BookCopy {
+  -id: Long
+  -barcode: String
+  -isAvailable: Boolean
+  -status: BookCopyStatus
+  -location: String
+  --
+  +checkOut(): void
+  +returnCopy(): void
+  +isOnLoan(): boolean
+}
+
+class Loan {
+  -id: Long
+  -loanDate: LocalDateTime
+  -dueDate: LocalDate
+  -returnDate: LocalDateTime
+  -status: LoanStatus
+  --
+  +isOverdue(): boolean
+  +returnBook(): void
+}
+
+class Author {
+  -id: Long
+  -firstName: String
+  -lastName: String
+  --
+  +getFullName(): String
+}
+
+class Staff {
+  -id: Long
+  -firstName: String
+  -lastName: String
+  -position: String
+  -employmentStatus: EmploymentStatus
+  --
+  +processReturn(bookCopyId): boolean
+}
+
+' ==== KEY RELATIONSHIPS ====
+
+' The CRITICAL change: Loan → BookCopy (not Book!)
+User ||--o{ Loan : "borrows"
+BookCopy ||--o{ Loan : "🔑 physical copy loaned"
+
+' Core library structure
+Library ||--o{ BookCopy : "houses physical copies"
+Library ||--o{ User : "has members"
+Library ||--o{ Staff : "employs"
+
+' Book hierarchy
+Author ||--o{ Book : "writes"
+Book ||--o{ BookCopy : "has physical copies"
+
+' Self-reference
+Staff }o--o| Staff : "supervised by"
+
+' ==== HIGHLIGHT THE KEY INSIGHT ====
+
+note top of Loan : 🎯 **REALISTIC DESIGN**\nLoans connect to BookCopy\n(specific barcode HB-001)\nNOT to Book (abstract concept)
+
+note right of BookCopy : 📍 **PHYSICAL REALITY**\nEach copy has:\n• Unique barcode\n• Specific location\n• Individual condition\n• Library assignment
+
+note left of Book : 📊 **METADATA ONLY**\nTracks totals across\nall libraries but users\nborrow specific copies
+
+@enduml 

@@ -1,0 +1,115 @@
+@startuml Library Borrowing Workflow
+
+!theme aws-orange
+
+actor User as U
+participant "Library Staff" as S
+participant "Library System" as LS
+database "Book" as B
+database "BookCopy" as BC
+database "Loan" as L
+
+== User Wants to Borrow "Harry Potter" ==
+
+U -> S: "I want to borrow Harry Potter"
+activate S
+
+S -> LS: Search for "Harry Potter"
+activate LS
+
+LS -> B: Find book by title
+activate B
+B -> LS: Return Book metadata\n(title, author, total copies)
+deactivate B
+
+LS -> BC: Find available copies
+activate BC
+BC -> LS: Return available BookCopies:\n• HP-001 (Downtown, Shelf A-15) ✅\n• HP-002 (Downtown, Shelf A-16) ✅\n• HP-003 (Uptown, Shelf B-08) ❌ On Loan
+deactivate BC
+
+LS -> S: Show available copies by location
+deactivate LS
+
+S -> U: "We have 2 copies available:\n• Copy HP-001 on Shelf A-15\n• Copy HP-002 on Shelf A-16"
+
+== User Selects Specific Copy ==
+
+U -> S: "I'll take HP-001"
+
+S -> LS: Process checkout for HP-001
+activate LS
+
+LS -> BC: Find BookCopy by barcode "HP-001"
+activate BC
+BC -> LS: Return specific BookCopy object
+deactivate BC
+
+LS -> BC: bookCopy.checkOut()
+activate BC
+BC -> BC: Set isAvailable = false\nSet status = CHECKED_OUT
+BC -> B: book.borrowCopy()
+activate B
+B -> B: Decrement availableCopies
+deactivate B
+deactivate BC
+
+LS -> L: Create new Loan(user, bookCopy_HP001, dueDate)
+activate L
+L -> L: Set loanDate = now()\nSet dueDate = now() + 14 days\nSet status = ACTIVE
+deactivate L
+
+LS -> S: Return loan confirmation
+deactivate LS
+
+S -> U: "✅ Loan created!\nBook: Harry Potter\nCopy: HP-001\nDue: " + dueDate
+deactivate S
+
+note over U, L
+**KEY INSIGHT**: User borrows specific physical copy HP-001, 
+not abstract "Harry Potter" concept. 
+System tracks exactly which barcode was taken!
+end note
+
+== Return Process (2 weeks later) ==
+
+U -> S: Returns physical book with barcode HP-001
+
+S -> LS: Scan barcode "HP-001"
+activate LS
+
+LS -> BC: Find BookCopy by barcode
+activate BC
+BC -> LS: Return BookCopy HP-001
+deactivate BC
+
+LS -> L: Find active loan for this BookCopy
+activate L
+L -> LS: Return Loan record
+deactivate L
+
+LS -> L: loan.returnBook()
+activate L
+L -> L: Set returnDate = now()\nSet status = RETURNED
+L -> BC: bookCopy.returnCopy()
+activate BC
+BC -> BC: Set isAvailable = true\nSet status = AVAILABLE
+BC -> B: book.returnCopy()
+activate B
+B -> B: Increment availableCopies
+deactivate B
+deactivate BC
+deactivate L
+
+LS -> S: Return confirmation
+deactivate LS
+
+S -> U: "✅ Book returned successfully!"
+
+note over S, L
+**REAL-WORLD ACCURACY**: 
+Staff scans the exact barcode that was borrowed.
+System knows precisely which physical copy was returned.
+Inventory automatically updated!
+end note
+
+@enduml 
