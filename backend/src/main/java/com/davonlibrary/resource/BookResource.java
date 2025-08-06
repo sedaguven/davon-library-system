@@ -1,128 +1,95 @@
 package com.davonlibrary.resource;
 
-import com.davonlibrary.entity.Author;
 import com.davonlibrary.entity.Book;
-import jakarta.transaction.Transactional;
+import com.davonlibrary.repository.BookRepository;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** REST resource for managing books in the library system. */
-@Path("/books")
+@Path("/api/books")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class BookResource {
 
-  /**
-   * Gets all books.
-   *
-   * @return list of all books
-   */
+  @Inject BookRepository bookRepository;
+
   @GET
-  public List<Book> getAllBooks() {
-    return Book.listAll();
+  public Response getAllBooks() {
+    try {
+      List<Book> books = bookRepository.listAll();
+      long total = bookRepository.count();
+
+      // Convert to DTO format for frontend
+      List<BookDTO> bookDTOs = books.stream().map(this::convertToDTO).collect(Collectors.toList());
+
+      // Create response object
+      BookListResponse response = new BookListResponse();
+      response.books = bookDTOs;
+      response.total = total;
+
+      return Response.ok(response).build();
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Error retrieving books: " + e.getMessage())
+          .build();
+    }
   }
 
-  /**
-   * Gets a book by ID.
-   *
-   * @param id the book ID
-   * @return the book if found
-   */
   @GET
   @Path("/{id}")
-  public Response getBook(@PathParam("id") Long id) {
-    Book book = Book.findById(id);
-    if (book == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(book).build();
-  }
-
-  /**
-   * Creates a new book.
-   *
-   * @param book the book to create
-   * @return the created book
-   */
-  @POST
-  @Transactional
-  public Response createBook(CreateBookRequest request) {
-    // Find the author
-    Author author = Author.findById(request.authorId);
-    if (author == null) {
-      return Response.status(Response.Status.BAD_REQUEST).entity("Author not found").build();
-    }
-
-    Book book = new Book(request.title, request.isbn, author, request.totalCopies);
-    book.persist();
-
-    return Response.status(Response.Status.CREATED).entity(book).build();
-  }
-
-  /**
-   * Updates an existing book.
-   *
-   * @param id the book ID
-   * @param updatedBook the updated book data
-   * @return the updated book
-   */
-  @PUT
-  @Path("/{id}")
-  @Transactional
-  public Response updateBook(@PathParam("id") Long id, UpdateBookRequest request) {
-    Book book = Book.findById(id);
-    if (book == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    if (request.title != null) {
-      book.title = request.title;
-    }
-    if (request.isbn != null) {
-      book.isbn = request.isbn;
-    }
-    if (request.totalCopies != null) {
-      book.totalCopies = request.totalCopies;
-      // Adjust available copies if necessary
-      if (book.availableCopies > request.totalCopies) {
-        book.availableCopies = request.totalCopies;
+  public Response getBookById(@PathParam("id") Long id) {
+    try {
+      Book book = bookRepository.findById(id);
+      if (book != null) {
+        return Response.ok(convertToDTO(book)).build();
+      } else {
+        return Response.status(Response.Status.NOT_FOUND)
+            .entity("Book not found with id: " + id)
+            .build();
       }
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Error retrieving book: " + e.getMessage())
+          .build();
     }
-
-    book.persist();
-    return Response.ok(book).build();
   }
 
-  /**
-   * Deletes a book.
-   *
-   * @param id the book ID
-   * @return response indicating success or failure
-   */
-  @DELETE
-  @Path("/{id}")
-  @Transactional
-  public Response deleteBook(@PathParam("id") Long id) {
-    Book book = Book.findById(id);
-    if (book == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
+  private BookDTO convertToDTO(Book book) {
+    BookDTO dto = new BookDTO();
+    dto.id = book.id;
+    dto.title = book.title;
+    dto.isbn = book.isbn;
+    dto.availableCopies = book.availableCopies;
+    dto.totalCopies = book.totalCopies;
+
+    // Get author name
+    if (book.author != null) {
+      dto.author = book.author.firstName + " " + book.author.lastName;
+    } else {
+      dto.author = "Unknown Author";
     }
 
-    book.delete();
-    return Response.noContent().build();
+    return dto;
   }
 
-  /**
-   * Gets available books only.
-   *
-   * @return list of available books
-   */
-  @GET
-  @Path("/available")
-  public List<Book> getAvailableBooks() {
-    return Book.list("availableCopies > 0");
+  /** Response DTO for books */
+  public static class BookDTO {
+    public Long id;
+    public String title;
+    public String isbn;
+    public String author;
+    public Integer availableCopies;
+    public Integer totalCopies;
+  }
+
+  /** Response DTO for a list of books. */
+  public static class BookListResponse {
+    public List<BookDTO> books;
+    public long total;
   }
 
   /** Request DTO for creating a book. */

@@ -1,165 +1,102 @@
 package com.davonlibrary.resource;
 
-import com.davonlibrary.entity.Library;
-import com.davonlibrary.entity.LibraryMembership;
 import com.davonlibrary.entity.User;
-import jakarta.transaction.Transactional;
+import com.davonlibrary.repository.UserRepository;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** REST resource for managing users in the library system. */
-@Path("/users")
+@Path("/api/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserResource {
 
-  /**
-   * Gets all users.
-   *
-   * @return list of all users
-   */
+  @Inject UserRepository userRepository;
+
   @GET
-  public List<User> getAllUsers() {
-    return User.listAll();
+  @Path("/profile")
+  public Response getProfile() {
+    // In a real application, you would get the user from the security context (e.g., JWT token)
+    // For now, we'll return a mock user
+    User mockUser = new User("Seda", "Guven", "seda.guven@example.com");
+    mockUser.id = 1L;
+    mockUser.role = "admin";
+    return Response.ok(convertToDTO(mockUser)).build();
   }
 
-  /**
-   * Gets a user by ID.
-   *
-   * @param id the user ID
-   * @return the user if found
-   */
+  @GET
+  public Response getAllUsers() {
+    try {
+      List<User> users = userRepository.listAll();
+      long total = userRepository.count();
+
+      // Convert to DTO format for frontend
+      List<UserDTO> userDTOs = users.stream().map(this::convertToDTO).collect(Collectors.toList());
+
+      // Create response object
+      UserListResponse response = new UserListResponse();
+      response.users = userDTOs;
+      response.total = total;
+
+      return Response.ok(response).build();
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Error retrieving users: " + e.getMessage())
+          .build();
+    }
+  }
+
   @GET
   @Path("/{id}")
-  public Response getUser(@PathParam("id") Long id) {
-    User user = User.findById(id);
-    if (user == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(user).build();
-  }
-
-  /**
-   * Creates a new user.
-   *
-   * @param request the user creation request
-   * @return the created user
-   */
-  @POST
-  @Transactional
-  public Response createUser(CreateUserRequest request) {
-    User user = new User(request.firstName, request.lastName, request.email);
-    user.persist();
-
-    // Create library membership if libraryId is provided
-    if (request.libraryId != null) {
-      Library library = Library.findById(request.libraryId);
-      if (library == null) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("Library not found").build();
+  public Response getUserById(@PathParam("id") Long id) {
+    try {
+      User user = userRepository.findById(id);
+      if (user != null) {
+        return Response.ok(convertToDTO(user)).build();
+      } else {
+        return Response.status(Response.Status.NOT_FOUND)
+            .entity("User not found with id: " + id)
+            .build();
       }
-
-      LibraryMembership membership = new LibraryMembership(user, library);
-      membership.persist();
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Error retrieving user: " + e.getMessage())
+          .build();
     }
-
-    return Response.status(Response.Status.CREATED).entity(user).build();
   }
 
-  /**
-   * Updates an existing user.
-   *
-   * @param id the user ID
-   * @param request the update request
-   * @return the updated user
-   */
-  @PUT
-  @Path("/{id}")
-  @Transactional
-  public Response updateUser(@PathParam("id") Long id, UpdateUserRequest request) {
-    User user = User.findById(id);
-    if (user == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    if (request.firstName != null) {
-      user.firstName = request.firstName;
-    }
-    if (request.lastName != null) {
-      user.lastName = request.lastName;
-    }
-    if (request.email != null) {
-      user.email = request.email;
-    }
-    if (request.libraryId != null) {
-      Library library = Library.findById(request.libraryId);
-      if (library != null) {
-        // Check if user is already a member of this library
-        if (!user.isMemberOf(library)) {
-          // Create a new membership
-          LibraryMembership membership = new LibraryMembership(user, library);
-          membership.persist();
-        }
-      }
-    }
-
-    user.persist();
-    return Response.ok(user).build();
+  private UserDTO convertToDTO(User user) {
+    UserDTO dto = new UserDTO();
+    dto.id = user.id;
+    dto.firstName = user.firstName;
+    dto.lastName = user.lastName;
+    dto.email = user.email;
+    dto.fullName = user.getFullName();
+    dto.role = user.role != null ? user.role.toLowerCase() : "user";
+    return dto;
   }
 
-  /**
-   * Deletes a user.
-   *
-   * @param id the user ID
-   * @return response indicating success or failure
-   */
-  @DELETE
-  @Path("/{id}")
-  @Transactional
-  public Response deleteUser(@PathParam("id") Long id) {
-    User user = User.findById(id);
-    if (user == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    user.delete();
-    return Response.noContent().build();
+  /** Response DTO for users */
+  public static class UserDTO {
+    public Long id;
+    public String firstName;
+    public String lastName;
+    public String email;
+    public String fullName;
+    public String role;
   }
 
-  /**
-   * Gets current loans for a user.
-   *
-   * @param id the user ID
-   * @return list of current loans
-   */
-  @GET
-  @Path("/{id}/loans")
-  public Response getUserLoans(@PathParam("id") Long id) {
-    User user = User.findById(id);
-    if (user == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(user.getCurrentLoans()).build();
+  /** Response DTO for a list of users. */
+  public static class UserListResponse {
+    public List<UserDTO> users;
+    public long total;
   }
 
-  /**
-   * Gets active reservations for a user.
-   *
-   * @param id the user ID
-   * @return list of active reservations
-   */
-  @GET
-  @Path("/{id}/reservations")
-  public Response getUserReservations(@PathParam("id") Long id) {
-    User user = User.findById(id);
-    if (user == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(user.getActiveReservations()).build();
-  }
-
-  /** Request DTO for creating a user. */
+  /** Request DTO for creating users */
   public static class CreateUserRequest {
     public String firstName;
     public String lastName;
@@ -167,11 +104,10 @@ public class UserResource {
     public Long libraryId;
   }
 
-  /** Request DTO for updating a user. */
+  /** Request DTO for updating users */
   public static class UpdateUserRequest {
     public String firstName;
     public String lastName;
     public String email;
-    public Long libraryId;
   }
 }

@@ -97,7 +97,6 @@ public class BookCopyResource {
     }
     if (request.status != null) {
       bookCopy.status = request.status;
-      bookCopy.isAvailable = (request.status == BookCopy.BookCopyStatus.AVAILABLE);
     }
     if (request.notes != null) {
       bookCopy.notes = request.notes;
@@ -126,7 +125,7 @@ public class BookCopyResource {
     if (bookCopy.book != null) {
       Book book = bookCopy.book;
       book.totalCopies = Math.max(0, (book.totalCopies != null ? book.totalCopies : 1) - 1);
-      if (bookCopy.isAvailable) {
+      if (bookCopy.status == BookCopy.BookCopyStatus.AVAILABLE) {
         book.availableCopies =
             Math.max(0, (book.availableCopies != null ? book.availableCopies : 1) - 1);
       }
@@ -145,7 +144,7 @@ public class BookCopyResource {
   @GET
   @Path("/available")
   public List<BookCopy> getAvailableBookCopies() {
-    return BookCopy.list("isAvailable = true");
+    return BookCopy.list("status = ?1", BookCopy.BookCopyStatus.AVAILABLE);
   }
 
   /**
