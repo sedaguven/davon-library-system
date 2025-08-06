@@ -182,15 +182,16 @@ public class ReservationRepository implements PanacheRepository<Reservation> {
    * @return the queue position if reservation exists
    */
   public Optional<Integer> getQueuePosition(Long userId, Long bookId) {
-    Integer result =
-        (Integer)
-            em.createQuery(
-                    "SELECT r.queuePosition FROM Reservation r WHERE r.user.id = ?1 AND r.book.id = ?2 AND r.status = ?3")
-                .setParameter(1, userId)
-                .setParameter(2, bookId)
-                .setParameter(3, ReservationStatus.ACTIVE)
-                .getSingleResult();
-    return Optional.ofNullable(result);
+    List<Integer> result =
+        em.createQuery(
+                "SELECT r.queuePosition FROM Reservation r WHERE r.user.id = ?1 AND r.book.id = ?2 AND r.status = ?3",
+                Integer.class)
+            .setParameter(1, userId)
+            .setParameter(2, bookId)
+            .setParameter(3, ReservationStatus.ACTIVE)
+            .getResultList();
+
+    return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
   }
 
   /**

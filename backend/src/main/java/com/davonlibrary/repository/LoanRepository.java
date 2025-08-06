@@ -2,6 +2,7 @@ package com.davonlibrary.repository;
 
 import com.davonlibrary.entity.Loan;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -15,6 +16,14 @@ import java.util.Optional;
 public class LoanRepository implements PanacheRepository<Loan> {
 
   @Inject EntityManager em;
+
+  public List<Loan> findByUser(Long userId) {
+    return list("user.id", userId);
+  }
+
+  public List<Loan> findRecent(int limit) {
+    return find("", Sort.by("loanDate").descending()).page(0, limit).list();
+  }
 
   /**
    * Finds all active loans (not returned).
@@ -54,16 +63,6 @@ public class LoanRepository implements PanacheRepository<Loan> {
    */
   public List<Loan> findActiveByUser(Long userId) {
     return list("user.id = ?1 AND returnDate IS NULL", userId);
-  }
-
-  /**
-   * Finds all loans for a specific user.
-   *
-   * @param userId the user ID
-   * @return list of all loans for the user
-   */
-  public List<Loan> findByUser(Long userId) {
-    return list("user.id", userId);
   }
 
   /**

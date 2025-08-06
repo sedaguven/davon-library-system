@@ -4,6 +4,7 @@ import com.davonlibrary.entity.Loan;
 import com.davonlibrary.entity.Reservation;
 import com.davonlibrary.entity.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -141,6 +142,10 @@ public class UserRepository implements PanacheRepository<User> {
             libraryId);
 
     return new UserStats(totalUsers, activeLoans, activeReservations);
+  }
+
+  public List<User> findRecent(int limit) {
+    return find("", Sort.by("joinDate").descending()).page(0, limit).list();
   }
 
   /** User statistics DTO. */

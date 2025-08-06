@@ -216,4 +216,9 @@ public class BookRepository implements PanacheRepository<Book> {
       this.outOfStockBooks = outOfStockBooks;
     }
   }
+
+  public Book findByIdWithCopies(Long id) {
+    return find("SELECT b FROM Book b LEFT JOIN FETCH b.bookCopies WHERE b.id = ?1", id)
+        .firstResult();
+  }
 }
