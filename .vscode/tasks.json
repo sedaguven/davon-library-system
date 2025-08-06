@@ -1,0 +1,179 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start-backend",
+            "type": "shell",
+            "command": "cd backend && ./mvnw quarkus:dev",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": ".",
+                    "file": 1,
+                    "location": 2,
+                    "message": 3
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*Quarkus .* started in .*",
+                    "endsPattern": ".*Listening on:.*"
+                }
+            }
+        },
+        {
+            "label": "start-frontend",
+            "type": "shell",
+            "command": "cd davon-library-webui && npm run dev",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": ".",
+                    "file": 1,
+                    "location": 2,
+                    "message": 3
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*ready started server on.*",
+                    "endsPattern": ".*Local:.*"
+                }
+            }
+        },
+        {
+            "label": "build-backend",
+            "type": "shell",
+            "command": "cd backend && ./mvnw clean compile",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "build-frontend",
+            "type": "shell",
+            "command": "cd davon-library-webui && npm run build",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "test-backend",
+            "type": "shell",
+            "command": "cd backend && ./mvnw test",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "test-frontend",
+            "type": "shell",
+            "command": "cd davon-library-webui && npm test",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "type": "shell",
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "owner": "quarkus",
+                    "fileLocation": [
+                        "relative",
+                        "${workspaceFolder}/src/main/resources/templates"
+                    ],
+                    "pattern": [
+                        {
+                            "regexp": "\\[(\\d+)\\]\\s(.*):(\\d+):(\\d+)\\s\\-\\s{(.*)}:\\s(.*)$",
+                            "file": 2,
+                            "line": 3,
+                            "column": 4,
+                            "message": 6
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^.*Scanning for projects...",
+                        "endsPattern": "(^.*Quarkus .* started in .*\\.)|(^.* ERROR .* Failed to start)"
+                    }
+                }
+            ],
+            "group": "build",
+            "label": "quarkus:dev (backend)",
+            "command": "./mvnw quarkus:dev ",
+            "windows": {
+                "command": ".\\mvnw.cmd quarkus:dev "
+            },
+            "options": {
+                "cwd": "backend"
+            }
+        },
+        {
+            "type": "shell",
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "owner": "quarkus",
+                    "fileLocation": [
+                        "relative",
+                        "${workspaceFolder}/src/main/resources/templates"
+                    ],
+                    "pattern": [
+                        {
+                            "regexp": "\\[(\\d+)\\]\\s(.*):(\\d+):(\\d+)\\s\\-\\s{(.*)}:\\s(.*)$",
+                            "file": 2,
+                            "line": 3,
+                            "column": 4,
+                            "message": 6
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true
+                    }
+                }
+            ],
+            "group": "build",
+            "label": "package -Pnative (backend)",
+            "command": "./mvnw package -Pnative ",
+            "windows": {
+                "command": ".\\mvnw.cmd package -Pnative "
+            },
+            "options": {
+                "cwd": "backend"
+            }
+        }
+    ]
+} 

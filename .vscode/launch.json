@@ -1,0 +1,105 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug Quarkus",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005,
+            "projectName": "davon-library-backend",
+            "timeout": 30000,
+            "skipFiles": [
+                "<java.base>/**",
+                "<java.runtime>/**",
+                "<java.lang.ref>/**"
+            ]
+        },
+        {
+            "name": "Debug Backend Only",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "io.quarkus.runner.GeneratedMain",
+            "projectName": "backend",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}/backend",
+            "vmArgs": [
+                "-Xms512m",
+                "-Xmx1024m",
+                "-XX:+UseG1GC",
+                "-XX:MaxGCPauseMillis=200",
+                "-XX:+DisableExplicitGC"
+            ],
+            "skipFiles": [
+                "<java.base>/**",
+                "<java.runtime>/**",
+                "<java.lang.ref>/**"
+            ]
+        },
+        {
+            "name": "Debug Frontend Only",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/davon-library-webui/node_modules/next/dist/bin/next",
+            "args": [
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/davon-library-webui",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--inspect"
+            }
+        },
+        {
+            "name": "Debug Full Stack",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/davon-library-webui/node_modules/next/dist/bin/next",
+            "args": [
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/davon-library-webui",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "serverReadyAction": {
+                "pattern": "started server on .+, url: (https?://.+)",
+                "uriFormat": "%s",
+                "action": "debugWithChrome"
+            },
+            "env": {
+                "NODE_OPTIONS": "--inspect"
+            },
+            "preLaunchTask": "start-backend"
+        },
+        {
+            "preLaunchTask": "quarkus:dev (backend)",
+            "type": "java",
+            "request": "attach",
+            "hostName": "localhost",
+            "name": "Debug Quarkus application (backend)",
+            "port": 5005,
+            "timeout": 30000,
+            "skipFiles": [
+                "<java.base>/**",
+                "<java.runtime>/**",
+                "<java.lang.ref>/**"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug Backend + Frontend",
+            "configurations": [
+                "Debug Backend Only",
+                "Debug Frontend Only"
+            ],
+            "stopAll": true
+        }
+    ]
+} 
