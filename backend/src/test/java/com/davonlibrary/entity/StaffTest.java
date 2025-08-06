@@ -105,7 +105,7 @@ class StaffTest {
   @DisplayName("Should process book checkout successfully")
   void shouldProcessBookCheckoutSuccessfully() {
     // Given
-    assertTrue(bookCopy.isAvailable);
+    assertTrue(bookCopy.isAvailable());
     int initialAvailable = bookCopy.book.availableCopies;
 
     // When
@@ -176,7 +176,7 @@ class StaffTest {
   @DisplayName("Should not process return when book is already available")
   void shouldNotProcessReturnWhenBookIsAlreadyAvailable() {
     // Given
-    assertTrue(bookCopy.isAvailable);
+    assertTrue(bookCopy.isAvailable());
     int initialAvailable = bookCopy.book.availableCopies;
 
     // When
@@ -194,7 +194,7 @@ class StaffTest {
   void shouldProcessReservationFulfillmentSuccessfully() {
     // Given
     Reservation reservation = new Reservation(user, bookCopy.book, LocalDate.now().plusDays(7));
-    assertTrue(bookCopy.isAvailable);
+    assertTrue(bookCopy.isAvailable());
 
     // When
     // boolean success = staff.processReservationFulfillment(reservation, bookCopy); // Method
