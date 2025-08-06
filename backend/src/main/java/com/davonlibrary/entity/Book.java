@@ -75,12 +75,13 @@ public class Book extends PanacheEntity {
    * @param author the book author
    * @param totalCopies the total number of copies
    */
-  public Book(String title, String isbn, Author author, Integer totalCopies) {
+  public Book(String title, String isbn, Author author, int totalCopies) {
     this.title = title;
     this.isbn = isbn;
     this.author = author;
     this.totalCopies = totalCopies;
     this.availableCopies = totalCopies;
+    this.bookCopies = new java.util.ArrayList<>();
   }
 
   /**
@@ -89,26 +90,36 @@ public class Book extends PanacheEntity {
    * @return true if available copies > 0
    */
   public boolean isAvailable() {
-    return availableCopies != null && availableCopies > 0;
+    if (bookCopies == null || bookCopies.isEmpty()) {
+      return false;
+    }
+    return bookCopies.stream().anyMatch(copy -> copy.status == BookCopy.BookCopyStatus.AVAILABLE);
   }
 
   /**
-   * Decrements available copies when a book is borrowed.
+   * Borrows a copy of the book, if available.
    *
-   * @return true if successful, false if no copies available
+   * @return the borrowed BookCopy, or null if none are available
    */
-  public boolean borrowCopy() {
-    if (isAvailable()) {
+  public BookCopy borrowCopy() {
+    BookCopy copy = getAvailableCopy();
+    if (copy != null) {
+      copy.checkOut();
       availableCopies--;
-      return true;
     }
-    return false;
+    return copy;
   }
 
-  /** Increments available copies when a book is returned. */
-  public void returnCopy() {
-    if (availableCopies < totalCopies) {
-      availableCopies++;
+  /**
+   * Returns a book copy.
+   *
+   * @param copy the BookCopy to return
+   */
+  public void returnCopy(BookCopy copy) {
+    if (copy != null && copy.book != null && copy.book.id.equals(this.id)) {
+      if (availableCopies < totalCopies) {
+        availableCopies++;
+      }
     }
   }
 
@@ -118,12 +129,10 @@ public class Book extends PanacheEntity {
    * @return formatted book information
    */
   public String getDetailedInfo() {
+    String authorName = (author != null) ? author.getFullName() : "Unknown";
     return String.format(
-        "%s by %s (ISBN: %s) - %d copies available",
-        title,
-        author != null ? author.getFullName() : "Unknown Author",
-        isbn != null ? isbn : "No ISBN",
-        availableCopies);
+        "Title: %s, ISBN: %s, Author: %s, Available Copies: %d, Total Copies: %d",
+        title, isbn, authorName, availableCopies, totalCopies);
   }
 
   /**
@@ -145,6 +154,16 @@ public class Book extends PanacheEntity {
    */
   public List<Reservation> getCurrentReservations() {
     return List.of(); // Simplified - no reservations relationship
+  }
+
+  public BookCopy getAvailableCopy() {
+    if (bookCopies == null) {
+      return null;
+    }
+    return bookCopies.stream()
+        .filter(copy -> copy.status == BookCopy.BookCopyStatus.AVAILABLE)
+        .findFirst()
+        .orElse(null);
   }
 
   @Override

@@ -1,6 +1,6 @@
 package com.davonlibrary.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,7 +10,11 @@ import java.time.LocalDateTime;
 /** Reservation entity for tracking book reservations when books are not immediately available. */
 @Entity
 @Table(name = "reservations")
-public class Reservation extends PanacheEntity {
+public class Reservation extends PanacheEntityBase {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  public Long id;
 
   @NotNull(message = "User is required")
   @ManyToOne(fetch = FetchType.LAZY)
@@ -47,6 +51,7 @@ public class Reservation extends PanacheEntity {
   /** Reservation status enumeration. */
   public enum ReservationStatus {
     ACTIVE,
+    PENDING,
     FULFILLED,
     CANCELLED,
     EXPIRED

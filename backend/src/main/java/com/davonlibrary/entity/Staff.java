@@ -138,7 +138,14 @@ public class Staff extends PanacheEntity {
    */
   public boolean checkAvailability(Long bookId) {
     Book book = Book.findById(bookId);
-    return book != null && book.isAvailable();
+    if (book == null) {
+      return false;
+    }
+
+    // Find an available copy of the book
+    return BookCopy.find("book = ?1 and status = ?2", book, BookCopy.BookCopyStatus.AVAILABLE)
+        .firstResultOptional()
+        .isPresent();
   }
 
   /**
@@ -149,7 +156,7 @@ public class Staff extends PanacheEntity {
    */
   public boolean processReturn(Long bookCopyId) {
     BookCopy bookCopy = BookCopy.findById(bookCopyId);
-    if (bookCopy == null || bookCopy.isAvailable) {
+    if (bookCopy == null || bookCopy.isAvailable()) {
       return false;
     }
 

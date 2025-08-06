@@ -1,7 +1,7 @@
 package com.davonlibrary.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +11,19 @@ import java.util.List;
 /** BookCopy entity representing individual physical copies of books. */
 @Entity
 @Table(name = "book_copies")
-public class BookCopy extends PanacheEntity {
+public class BookCopy extends PanacheEntityBase {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  public Long id;
+
+  public enum BookCopyStatus {
+    AVAILABLE,
+    CHECKED_OUT,
+    MAINTENANCE,
+    DAMAGED,
+    LOST
+  }
 
   @NotBlank(message = "Barcode is required")
   @Size(max = 100, message = "Barcode must not exceed 100 characters")
@@ -28,12 +40,10 @@ public class BookCopy extends PanacheEntity {
   @JoinColumn(name = "library_id", nullable = false)
   public Library library;
 
-  @Column(name = "is_available")
-  public Boolean isAvailable = true;
-
+  @NotNull(message = "Status is required")
   @Enumerated(EnumType.STRING)
-  @Column(name = "status")
-  public BookCopyStatus status = BookCopyStatus.AVAILABLE;
+  @Column(name = "status", nullable = false)
+  public BookCopyStatus status;
 
   @Size(max = 100, message = "Location must not exceed 100 characters")
   @Column(name = "location", length = 100)
@@ -46,16 +56,6 @@ public class BookCopy extends PanacheEntity {
   @JsonIgnore
   @OneToMany(mappedBy = "bookCopy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   public List<Loan> loans;
-
-  /** Book copy status enumeration. */
-  public enum BookCopyStatus {
-    AVAILABLE,
-    CHECKED_OUT,
-    RESERVED,
-    MAINTENANCE,
-    LOST,
-    DAMAGED
-  }
 
   /** Default constructor for JPA. */
   public BookCopy() {}
@@ -71,6 +71,7 @@ public class BookCopy extends PanacheEntity {
     this.book = book;
     this.library = library;
     this.barcode = barcode;
+    this.status = BookCopyStatus.AVAILABLE;
   }
 
   /**
@@ -86,33 +87,35 @@ public class BookCopy extends PanacheEntity {
     this.library = library;
     this.barcode = barcode;
     this.location = location;
+    this.status = BookCopyStatus.AVAILABLE;
+  }
+
+  /**
+   * Checks if this copy is available.
+   *
+   * @return true if the status is AVAILABLE
+   */
+  public boolean isAvailable() {
+    return this.status == BookCopyStatus.AVAILABLE;
   }
 
   /** Checks out this copy. */
   public void checkOut() {
-    if (isAvailable) {
-      isAvailable = false;
-      // Update the book's available copies count
-      if (book != null) {
-        book.borrowCopy();
-      }
+    if (this.status == BookCopyStatus.AVAILABLE) {
+      this.status = BookCopyStatus.CHECKED_OUT;
     }
   }
 
   /** Returns this copy to available status. */
   public void returnCopy() {
-    if (!isAvailable) {
-      isAvailable = true;
-      // Update the book's available copies count
-      if (book != null) {
-        book.returnCopy();
-      }
+    if (this.status == BookCopyStatus.CHECKED_OUT) {
+      this.status = BookCopyStatus.AVAILABLE;
     }
   }
 
   /** Marks this copy as damaged. */
   public void markAsDamaged() {
-    isAvailable = false;
+    this.status = BookCopyStatus.DAMAGED;
   }
 
   /**
@@ -121,7 +124,7 @@ public class BookCopy extends PanacheEntity {
    * @param reason the reason for maintenance
    */
   public void sendToMaintenance(String reason) {
-    isAvailable = false;
+    this.status = BookCopyStatus.MAINTENANCE;
     this.notes = reason;
   }
 
@@ -156,8 +159,8 @@ public class BookCopy extends PanacheEntity {
         + ", barcode='"
         + barcode
         + '\''
-        + ", isAvailable="
-        + isAvailable
+        + ", status="
+        + status
         + '}';
   }
 }

@@ -1,7 +1,7 @@
 package com.davonlibrary.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,7 +11,11 @@ import java.util.List;
 /** Library entity representing physical library locations. */
 @Entity
 @Table(name = "libraries")
-public class Library extends PanacheEntity {
+public class Library extends PanacheEntityBase {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  public Long id;
 
   @NotBlank(message = "Library name is required")
   @Size(max = 200, message = "Library name must not exceed 200 characters")
@@ -93,7 +97,7 @@ public class Library extends PanacheEntity {
     }
 
     return bookCopies.stream()
-        .filter(bookCopy -> bookCopy.isAvailable != null && bookCopy.isAvailable)
+        .filter(bookCopy -> bookCopy.status == BookCopy.BookCopyStatus.AVAILABLE)
         .map(bookCopy -> bookCopy.book)
         .distinct()
         .toList();

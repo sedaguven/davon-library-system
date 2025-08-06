@@ -1,6 +1,6 @@
 package com.davonlibrary.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -8,7 +8,11 @@ import java.time.LocalDate;
 /** LibraryMembership entity representing the many-to-many relationship between User and Library. */
 @Entity
 @Table(name = "library_memberships")
-public class LibraryMembership extends PanacheEntity {
+public class LibraryMembership extends PanacheEntityBase {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  public Long id;
 
   @NotNull(message = "User is required")
   @ManyToOne(fetch = FetchType.LAZY)

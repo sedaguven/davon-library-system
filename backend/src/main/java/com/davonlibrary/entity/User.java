@@ -1,17 +1,22 @@
 package com.davonlibrary.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import java.util.List;
 
 /** User entity representing library members. */
 @Entity
 @Table(name = "users")
-public class User extends PanacheEntity {
+public class User extends PanacheEntityBase {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  public Long id;
 
   @NotBlank(message = "First name is required")
   @Size(max = 100, message = "First name must not exceed 100 characters")
@@ -28,6 +33,20 @@ public class User extends PanacheEntity {
   @Size(max = 255, message = "Email must not exceed 255 characters")
   @Column(name = "email", nullable = false, unique = true)
   public String email;
+
+  @JsonIgnore
+  @Column(name = "password_hash", nullable = false)
+  public String passwordHash;
+
+  @NotBlank(message = "Role is required")
+  @Column(name = "role", nullable = false)
+  public String role;
+
+  public LocalDate joinDate;
+
+  @ManyToOne
+  @JoinColumn(name = "library_id")
+  public Library library;
 
   @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -55,6 +74,23 @@ public class User extends PanacheEntity {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+    this.passwordHash = ""; // Will be set separately
+  }
+
+  /**
+   * Constructor with password hash.
+   *
+   * @param firstName the user's first name
+   * @param lastName the user's last name
+   * @param email the user's email address
+   * @param passwordHash the hashed password
+   */
+  public User(String firstName, String lastName, String email, String passwordHash) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.passwordHash = passwordHash;
+    this.role = "user"; // Default role
   }
 
   /**
@@ -69,16 +105,12 @@ public class User extends PanacheEntity {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
-    // Note: Library membership should be created separately
+    this.library = library;
+    this.joinDate = LocalDate.now();
   }
 
-  /**
-   * Gets the full name of the user.
-   *
-   * @return the full name as "firstName lastName"
-   */
   public String getFullName() {
-    return firstName + " " + lastName;
+    return this.firstName + " " + this.lastName;
   }
 
   /**
