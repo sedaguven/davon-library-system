@@ -20,11 +20,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkUser = async () => {
       const token = localStorage.getItem('token');
-    if (token) {
+      const storedUser = localStorage.getItem('user');
+      if (token && storedUser) {
         try {
-          // You might want to verify the token with your backend here
+          setUser(JSON.parse(storedUser));
+        } catch (_) {
+          localStorage.removeItem('user');
+        }
+        setLoading(false);
+        return;
+      }
+      if (token) {
+        try {
           const userData = await authService.getProfile();
-          setUser(userData);
+          if (userData) {
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+          }
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
           localStorage.removeItem('token');
@@ -37,11 +49,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (token: string, user: User) => {
     localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 

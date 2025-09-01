@@ -8,6 +8,7 @@ export interface Book {
     availableCopies: number;
     totalCopies: number;
     isbn: string;
+    status?: 'AVAILABLE' | 'UNAVAILABLE';
 }
 
 export interface User {

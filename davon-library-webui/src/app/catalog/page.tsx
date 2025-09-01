@@ -19,7 +19,7 @@ export default function CatalogPage() {
     const fetchBooks = async () => {
       try {
         setLoading(true);
-        const fetchedBooks = await bookService.getAllBooks();
+        const { books: fetchedBooks } = await bookService.getAllBooks();
         setBooks(fetchedBooks);
         setFilteredBooks(fetchedBooks);
         setError(null);

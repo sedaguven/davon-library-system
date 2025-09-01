@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'next/navigation';
-import { bookService, borrowBook, reserveBook } from '../../services/bookService';
+import { bookService, borrowBook, reserveBook, getBookCopiesByBook, BookCopyDTO } from '../../services/bookService';
 import { Book } from '@/lib/types';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -12,7 +12,8 @@ export default function BookDetailPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -25,9 +26,15 @@ export default function BookDetailPage() {
       try {
         setLoading(true);
         const fetchedBook = await bookService.getBookById(bookId);
-        
+        let available = fetchedBook?.available ?? false;
         if (fetchedBook) {
-          setBook(fetchedBook);
+          // Double-check availability from copies endpoint
+          const copies: BookCopyDTO[] = await getBookCopiesByBook(bookId);
+          if (Array.isArray(copies) && copies.length > 0) {
+            const availableCount = copies.filter(c => c.status === 'AVAILABLE').length;
+            available = availableCount > 0;
+          }
+          setBook({ ...fetchedBook, available });
           setError(null);
         } else {
           setError('Book not found');
@@ -114,7 +121,7 @@ export default function BookDetailPage() {
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-red-100 text-red-800'
               }`}>
-                {book.available ? 'Available' : 'Not Available'}
+                {book.available ? 'Available' : 'Unavailable'}
               </span>
             </div>
 
@@ -127,29 +134,21 @@ export default function BookDetailPage() {
 
             <div className="border-t pt-6">
               <div className="flex space-x-4">
-                <button
-                  onClick={handleBorrow}
-                  className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
-                    book.available
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                  disabled={!book.available}
-                >
-                  Borrow Book
-                </button>
-                
-                <button 
-                  onClick={handleReserve}
-                  className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
-                    !book.available
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                  disabled={book.available}
-                >
-                  Reserve Book
-                </button>
+                {book.available ? (
+                  <button
+                    onClick={handleBorrow}
+                    className={'flex-1 py-3 px-6 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700'}
+                  >
+                    Borrow Book
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleReserve}
+                    className={'flex-1 py-3 px-6 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700'}
+                  >
+                    Reserve Book
+                  </button>
+                )}
               </div>
             </div>
           </div>
