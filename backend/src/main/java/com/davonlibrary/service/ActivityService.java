@@ -5,6 +5,7 @@ import com.davonlibrary.entity.Loan;
 import com.davonlibrary.entity.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,13 +36,15 @@ public class ActivityService {
     Stream<ActivityDTO> userActivities =
         recentUsers.stream()
             .map(
-                user ->
-                    new ActivityDTO(
-                        "New User",
-                        "New user registered: " + user.getFullName(),
-                        user.joinDate.atStartOfDay(),
-                        user.getFullName(),
-                        null));
+                user -> {
+                  LocalDate effectiveJoinDate = user.joinDate != null ? user.joinDate : LocalDate.now();
+                  return new ActivityDTO(
+                      "New User",
+                      "New user registered: " + user.getFullName(),
+                      effectiveJoinDate.atStartOfDay(),
+                      user.getFullName(),
+                      null);
+                });
 
     return Stream.concat(loanActivities, userActivities)
         .sorted(Comparator.comparing(ActivityDTO::getTimestamp).reversed())

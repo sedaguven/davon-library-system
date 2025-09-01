@@ -8,12 +8,16 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import com.davonlibrary.repository.BookRepository;
+import jakarta.inject.Inject;
 
 /** REST resource for managing book copies in the library system. */
-@Path("/book-copies")
+@Path("/api/book-copies")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class BookCopyResource {
+
+  @Inject BookRepository bookRepository;
 
   /**
    * Gets all book copies.
@@ -70,6 +74,9 @@ public class BookCopyResource {
     book.availableCopies = (book.availableCopies != null ? book.availableCopies : 0) + 1;
     book.persist();
 
+    // Recompute aggregates (status)
+    bookRepository.updateAggregates(book.id);
+
     return Response.status(Response.Status.CREATED).entity(bookCopy).build();
   }
 
@@ -103,6 +110,12 @@ public class BookCopyResource {
     }
 
     bookCopy.persist();
+
+    // Recompute aggregates (status)
+    if (bookCopy.book != null) {
+      bookRepository.updateAggregates(bookCopy.book.id);
+    }
+
     return Response.ok(bookCopy).build();
   }
 
@@ -130,6 +143,9 @@ public class BookCopyResource {
             Math.max(0, (book.availableCopies != null ? book.availableCopies : 1) - 1);
       }
       book.persist();
+
+      // Recompute aggregates (status)
+      bookRepository.updateAggregates(book.id);
     }
 
     bookCopy.delete();
@@ -189,6 +205,11 @@ public class BookCopyResource {
 
     bookCopy.sendToMaintenance(request.reason);
     bookCopy.persist();
+
+    // Recompute aggregates (status)
+    if (bookCopy.book != null) {
+      bookRepository.updateAggregates(bookCopy.book.id);
+    }
 
     return Response.ok(new MaintenanceResponse(true, "Book copy sent to maintenance")).build();
   }

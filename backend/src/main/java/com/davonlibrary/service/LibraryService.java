@@ -66,6 +66,15 @@ public class LibraryService {
       availableCopy.status = BookCopy.BookCopyStatus.CHECKED_OUT;
       availableCopy.persist();
 
+      // Keep Book.availableCopies and status in sync with actual copy status
+      if (book.availableCopies == null) {
+        book.availableCopies = 0;
+      } else if (book.availableCopies > 0) {
+        book.availableCopies--;
+      }
+      // Recompute aggregates (including status) to be safe
+      bookRepository.updateAggregates(book.id);
+
       return loan;
     } catch (Exception e) {
       System.err.println("### A critical error occurred in borrowBook ###");

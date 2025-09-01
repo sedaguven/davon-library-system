@@ -14,12 +14,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import com.davonlibrary.entity.Book;
+import com.davonlibrary.repository.BookRepository;
 
 @ApplicationScoped
 public class LoanService {
   @Inject LoanRepository loanRepository;
   @Inject BookCopyRepository bookCopyRepository;
   @Inject FineRepository fineRepository;
+  @Inject BookRepository bookRepository;
 
   public List<Loan> getRecentLoans(int limit) {
     return loanRepository.findRecent(limit);
@@ -51,6 +54,18 @@ public class LoanService {
       BookCopy bookCopy = loan.bookCopy;
       bookCopy.status = BookCopy.BookCopyStatus.AVAILABLE;
       bookCopyRepository.persist(bookCopy);
+
+      // Increment book available copies to reflect returned copy
+      Book book = bookCopy.book;
+      if (book != null) {
+        if (book.availableCopies == null) {
+          book.availableCopies = 1;
+        } else {
+          book.availableCopies++;
+        }
+        // Recompute aggregates (including status)
+        bookRepository.updateAggregates(book.id);
+      }
 
       if (loan.returnDate.isAfter(loan.dueDate.atStartOfDay())) {
         long daysOverdue = ChronoUnit.DAYS.between(loan.dueDate, loan.returnDate.toLocalDate());

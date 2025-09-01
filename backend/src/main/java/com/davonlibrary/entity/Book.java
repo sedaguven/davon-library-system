@@ -40,48 +40,33 @@ public class Book extends PanacheEntity {
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   public List<BookCopy> bookCopies;
 
+  /**
+   * Logical status of a Book aggregated from its copies.
+   */
+  public enum BookStatus {
+    AVAILABLE,
+    UNAVAILABLE
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  public BookStatus status = BookStatus.UNAVAILABLE;
+
   /** Default constructor for JPA. */
   public Book() {}
 
   /**
-   * Constructor with essential fields.
-   *
-   * @param title the book title
-   * @param author the book author
+   * Expose persisted status.
    */
-  public Book(String title, Author author) {
-    this.title = title;
-    this.author = author;
+  public BookStatus getStatus() {
+    return status;
   }
 
   /**
-   * Constructor with common fields.
-   *
-   * @param title the book title
-   * @param isbn the book ISBN
-   * @param author the book author
+   * Allow manually overriding status.
    */
-  public Book(String title, String isbn, Author author) {
-    this.title = title;
-    this.isbn = isbn;
-    this.author = author;
-  }
-
-  /**
-   * Constructor with total copies.
-   *
-   * @param title the book title
-   * @param isbn the book ISBN
-   * @param author the book author
-   * @param totalCopies the total number of copies
-   */
-  public Book(String title, String isbn, Author author, int totalCopies) {
-    this.title = title;
-    this.isbn = isbn;
-    this.author = author;
-    this.totalCopies = totalCopies;
-    this.availableCopies = totalCopies;
-    this.bookCopies = new java.util.ArrayList<>();
+  public void setStatus(BookStatus status) {
+    this.status = status;
   }
 
   /**

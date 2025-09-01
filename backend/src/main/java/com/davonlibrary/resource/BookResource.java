@@ -1,6 +1,7 @@
 package com.davonlibrary.resource;
 
 import com.davonlibrary.entity.Book;
+import com.davonlibrary.entity.BookCopy;
 import com.davonlibrary.repository.BookRepository;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -23,7 +24,7 @@ public class BookResource {
       List<Book> books = bookRepository.listAll();
       long total = bookRepository.count();
 
-      // Convert to DTO format for frontend
+      // Convert to DTO format for frontend with dynamic copy counts
       List<BookDTO> bookDTOs = books.stream().map(this::convertToDTO).collect(Collectors.toList());
 
       // Create response object
@@ -63,8 +64,18 @@ public class BookResource {
     dto.id = book.id;
     dto.title = book.title;
     dto.isbn = book.isbn;
-    dto.availableCopies = book.availableCopies;
-    dto.totalCopies = book.totalCopies;
+
+    // Compute dynamic counts from BookCopy
+    int totalCopies = (int) BookCopy.count("book.id", book.id);
+    int availableCopies =
+        (int)
+            BookCopy.count(
+                "book.id = ?1 and status = ?2", book.id, BookCopy.BookCopyStatus.AVAILABLE);
+    dto.totalCopies = totalCopies;
+    dto.availableCopies = availableCopies;
+
+    // Set status from persisted field, fallback to counts
+    dto.status = book.status != null ? book.status.name() : (availableCopies > 0 ? "AVAILABLE" : "UNAVAILABLE");
 
     // Get author name
     if (book.author != null) {
@@ -84,6 +95,7 @@ public class BookResource {
     public String author;
     public Integer availableCopies;
     public Integer totalCopies;
+    public String status;
   }
 
   /** Response DTO for a list of books. */

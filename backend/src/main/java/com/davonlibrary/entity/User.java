@@ -63,6 +63,14 @@ public class User extends PanacheEntityBase {
   /** Default constructor for JPA. */
   public User() {}
 
+  /** Ensure joinDate is set at creation time if missing. */
+  @PrePersist
+  void setJoinDateIfMissing() {
+    if (this.joinDate == null) {
+      this.joinDate = LocalDate.now();
+    }
+  }
+
   /**
    * Constructor with essential fields.
    *

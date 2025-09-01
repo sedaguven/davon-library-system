@@ -221,4 +221,22 @@ public class BookRepository implements PanacheRepository<Book> {
     return find("SELECT b FROM Book b LEFT JOIN FETCH b.bookCopies WHERE b.id = ?1", id)
         .firstResult();
   }
+
+  /**
+   * Recomputes and persists aggregate fields and status for a book.
+   */
+  public void updateAggregates(Long bookId) {
+    Book book = findById(bookId);
+    if (book == null) {
+      return;
+    }
+    long total = BookCopy.count("book.id", bookId);
+    long available =
+        BookCopy.count(
+            "book.id = ?1 and status = ?2", bookId, BookCopy.BookCopyStatus.AVAILABLE);
+    book.totalCopies = (int) total;
+    book.availableCopies = (int) available;
+    book.status = available > 0 ? Book.BookStatus.AVAILABLE : Book.BookStatus.UNAVAILABLE;
+    getEntityManager().merge(book);
+  }
 }
