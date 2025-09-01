@@ -22,6 +22,13 @@ public class ReservationService {
     if (!isValidReservation(reservation)) {
       throw new IllegalArgumentException("Invalid reservation details provided.");
     }
+    // Prevent duplicate active reservations for the same user and book
+    if (reservation.user != null
+        && reservation.book != null
+        && reservationRepository.hasActiveReservationForBook(reservation.user.id, reservation.book.id)) {
+      throw new WebApplicationException(
+          "You already have an active reservation for this book.", Response.Status.CONFLICT);
+    }
     try {
       reservationRepository.persist(reservation);
       return reservation;
@@ -75,6 +82,20 @@ public class ReservationService {
     return bookId != null && bookId > 0;
   }
 
+  /**
+   * Checks whether a user already has an active reservation for a given book.
+   *
+   * @param userId the user ID
+   * @param bookId the book ID
+   * @return true if there is an active reservation by the user for the book
+   */
+  public boolean hasActiveReservationForBook(Long userId, Long bookId) {
+    if (!isValidUserId(userId) || !isValidBookId(bookId)) {
+      throw new IllegalArgumentException("Invalid user or book ID provided.");
+    }
+    return reservationRepository.hasActiveReservationForBook(userId, bookId);
+  }
+
   public List<Reservation> getReservationsByUserId(Long userId) {
     if (!isValidUserId(userId)) {
       throw new IllegalArgumentException("Invalid user ID provided.");
@@ -97,6 +118,7 @@ public class ReservationService {
     return reservationRepository.getQueuePosition(userId, bookId);
   }
 
+  @Transactional
   public List<ReservationDTO> getReservationsWithQueuePosition(Long userId) {
     if (!isValidUserId(userId)) {
       throw new IllegalArgumentException("Invalid user ID provided.");
@@ -111,7 +133,8 @@ public class ReservationService {
                   reservationRepository.getQueuePosition(userId, reservation.book.id).orElse(null);
               return new ReservationDTO(
                   reservation.id,
-                  reservation.book,
+                  reservation.book.id,
+                  reservation.book.title,
                   reservation.reservationDate.toLocalDate(),
                   reservation.status.name(),
                   queuePosition);

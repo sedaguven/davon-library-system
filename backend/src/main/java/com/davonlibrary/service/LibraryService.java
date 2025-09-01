@@ -100,6 +100,16 @@ public class LibraryService {
         throw new IllegalArgumentException("User not found with ID: " + userId);
       }
 
+      // Do not allow reservations when the book is currently available
+      if (book.availableCopies != null && book.availableCopies > 0) {
+        throw new IllegalStateException("Book has available copies; borrowing is possible.");
+      }
+
+      // Prevent duplicate active reservations by the same user for the same book
+      if (reservationService.hasActiveReservationForBook(user.id, book.id)) {
+        throw new IllegalStateException("You already have an active reservation for this book.");
+      }
+
       long queuePosition = reservationService.countActiveReservationsByBook(book.id) + 1;
 
       Reservation reservation = new Reservation();

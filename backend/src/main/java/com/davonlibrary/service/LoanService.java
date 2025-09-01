@@ -49,13 +49,20 @@ public class LoanService {
   @Transactional
   public Loan returnLoan(Long loanId) {
     Loan loan = loanRepository.findById(loanId);
-    if (loan != null && loan.returnDate == null) {
-      loan.returnDate = LocalDateTime.now();
-      BookCopy bookCopy = loan.bookCopy;
-      bookCopy.status = BookCopy.BookCopyStatus.AVAILABLE;
-      bookCopyRepository.persist(bookCopy);
+    if (loan == null) {
+      return null;
+    }
+    if (loan.returnDate != null) {
+      return loan; // already returned
+    }
 
-      // Increment book available copies to reflect returned copy
+    loan.returnDate = LocalDateTime.now();
+    loan.status = Loan.LoanStatus.RETURNED;
+
+    BookCopy bookCopy = loan.bookCopy;
+    if (bookCopy != null) {
+      bookCopy.status = BookCopy.BookCopyStatus.AVAILABLE; // managed entity; no explicit persist needed
+
       Book book = bookCopy.book;
       if (book != null) {
         if (book.availableCopies == null) {
@@ -66,15 +73,16 @@ public class LoanService {
         // Recompute aggregates (including status)
         bookRepository.updateAggregates(book.id);
       }
-
-      if (loan.returnDate.isAfter(loan.dueDate.atStartOfDay())) {
-        long daysOverdue = ChronoUnit.DAYS.between(loan.dueDate, loan.returnDate.toLocalDate());
-        BigDecimal fineAmount = new BigDecimal("0.50").multiply(new BigDecimal(daysOverdue));
-        Fine fine = new Fine(loan, fineAmount, "Overdue return");
-        fineRepository.persist(fine);
-      }
-      loanRepository.persist(loan);
     }
+
+    if (loan.dueDate != null && loan.returnDate.isAfter(loan.dueDate.atStartOfDay())) {
+      long daysOverdue = ChronoUnit.DAYS.between(loan.dueDate, loan.returnDate.toLocalDate());
+      BigDecimal fineAmount = new BigDecimal("0.50").multiply(new BigDecimal(daysOverdue));
+      Fine fine = new Fine(loan, fineAmount, "Overdue return");
+      fineRepository.persist(fine);
+    }
+
+    // loan is managed; changes will be flushed by transaction
     return loan;
   }
 

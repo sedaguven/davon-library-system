@@ -37,13 +37,18 @@ public class ReservationRepository implements PanacheRepository<Reservation> {
   }
 
   /**
-   * Finds all reservations for a specific user.
+   * Finds all reservations for a specific user, eager-loading the book to avoid lazy loading issues.
    *
    * @param userId the user ID
    * @return list of all reservations for the user
    */
   public List<Reservation> findByUser(Long userId) {
-    return list("user.id", userId);
+    return em
+        .createQuery(
+            "SELECT r FROM Reservation r JOIN FETCH r.book WHERE r.user.id = :userId",
+            Reservation.class)
+        .setParameter("userId", userId)
+        .getResultList();
   }
 
   /**
