@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import { bookService, borrowBook, reserveBook, getBookCopiesByBook, BookCopyDTO } from '../../services/bookService';
 import { Book } from '@/lib/types';
 import { AuthContext } from '../../context/AuthContext';
+import apiClient from '../../services/api';
+import axios from 'axios';
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -14,6 +16,7 @@ export default function BookDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const auth = useContext(AuthContext);
   const user = auth?.user;
+  const [alreadyReserved, setAlreadyReserved] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -50,6 +53,22 @@ export default function BookDetailPage() {
     fetchBook();
   }, [bookId]);
 
+  useEffect(() => {
+    const checkReservation = async () => {
+      if (!user || !bookId) return;
+      try {
+        const resp = await apiClient.get(
+          `/reservations/queue-position?userId=${user.id}&bookId=${bookId}`,
+          { validateStatus: (s) => s === 200 || s === 404 }
+        );
+        setAlreadyReserved(resp.status === 200 && typeof resp.data === 'number');
+      } catch (_) {
+        setAlreadyReserved(false);
+      }
+    };
+    checkReservation();
+  }, [user, bookId]);
+
   const handleBorrow = async () => {
     if (user && book) {
       try {
@@ -66,8 +85,19 @@ export default function BookDetailPage() {
       try {
         await reserveBook(user.id, book.id);
         alert('Book reserved successfully!');
-      } catch (error) {
-        alert('Failed to reserve book.');
+        setAlreadyReserved(true);
+      } catch (error: unknown) {
+        let message = 'Failed to reserve book.';
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          const serverMessage = (error.response?.data as any)?.message ?? error.message;
+          if (status === 409) {
+            message = 'You already have an active reservation for this book.';
+          } else if (status === 400) {
+            message = String(serverMessage ?? 'Invalid request.');
+          }
+        }
+        alert(message);
       }
     }
   };
@@ -144,9 +174,10 @@ export default function BookDetailPage() {
                 ) : (
                   <button 
                     onClick={handleReserve}
-                    className={'flex-1 py-3 px-6 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700'}
+                    disabled={alreadyReserved}
+                    className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${alreadyReserved ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                   >
-                    Reserve Book
+                    {alreadyReserved ? 'Already Reserved' : 'Reserve Book'}
                   </button>
                 )}
               </div>

@@ -35,7 +35,8 @@ export interface Fine {
 
 export interface ReservationDTO {
     id: number;
-    book: Book;
+    bookId: number;
+    bookTitle: string;
     reservationDate: string;
     status: string;
     queuePosition: number;

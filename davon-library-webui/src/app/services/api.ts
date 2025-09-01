@@ -26,7 +26,14 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.message);
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+    const isExpectedClientOutcome = status === 404 || status === 409;
+    const message = axios.isAxiosError(error)
+      ? (error.response?.data?.message ?? error.response?.data ?? error.message)
+      : (error instanceof Error ? error.message : String(error));
+    if (!isExpectedClientOutcome) {
+      console.error('API Error:', message);
+    }
     return Promise.reject(error);
   }
 );

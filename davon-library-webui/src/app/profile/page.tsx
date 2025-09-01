@@ -35,48 +35,59 @@ const ProfilePage = () => {
     const [loanHistory, setLoanHistory] = useState<Loan[]>([]);
     const [reservations, setReservations] = useState<ReservationDTO[]>([]);
 
+    const refreshLoans = async (userId: number) => {
+        try {
+            const loans = await loanService.getLoansByUserId(userId);
+            if (Array.isArray(loans)) {
+                const activeLoans = loans.filter(loan => !loan.returnedDate);
+                const pastLoans = loans.filter(loan => loan.returnedDate);
+                setCurrentLoans(activeLoans);
+                setLoanHistory(pastLoans);
+            } else {
+                setCurrentLoans([]);
+                setLoanHistory([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch loans:", error);
+            setCurrentLoans([]);
+            setLoanHistory([]);
+        }
+    };
+
+    const refreshReservations = async (userId: number) => {
+        try {
+            const userReservations = await reservationService.getReservationsByUserId(userId);
+            if (Array.isArray(userReservations)) {
+                setReservations(userReservations);
+            } else {
+                setReservations([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch reservations:", error);
+            setReservations([]);
+        }
+    };
+
     useEffect(() => {
         if (authContext?.loading) return;
         if (!user) {
             router.push('/login');
         } else {
-            const fetchLoans = async () => {
-                try {
-                    const loans = await loanService.getLoansByUserId(user.id);
-                    if (Array.isArray(loans)) {
-                        const activeLoans = loans.filter(loan => !loan.returnedDate);
-                        const pastLoans = loans.filter(loan => loan.returnedDate);
-                        setCurrentLoans(activeLoans);
-                        setLoanHistory(pastLoans);
-                    } else {
-                        setCurrentLoans([]);
-                        setLoanHistory([]);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch loans:", error);
-                    setCurrentLoans([]);
-                    setLoanHistory([]);
-                }
-            };
-
-            const fetchReservations = async () => {
-                try {
-                    const userReservations = await reservationService.getReservationsByUserId(user.id);
-                    if (Array.isArray(userReservations)) {
-                        setReservations(userReservations);
-                    } else {
-                        setReservations([]);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch reservations:", error);
-                    setReservations([]);
-                }
-            };
-
-            fetchLoans();
-            fetchReservations();
+            refreshLoans(user.id);
+            refreshReservations(user.id);
         }
     }, [user, router, authContext?.loading]);
+
+    const handleReturn = async (loanId: number) => {
+        try {
+            await loanService.returnBook(loanId);
+            if (user) {
+                await refreshLoans(user.id);
+            }
+        } catch (e) {
+            console.error('Failed to return loan', e);
+        }
+    };
 
     if (authContext?.loading || !user) {
         return <div>Loading...</div>;
@@ -140,7 +151,7 @@ const ProfilePage = () => {
                         {reservations.map((reservation: ReservationDTO) => (
                             <div key={reservation.id} className="bg-gray-50 p-4 rounded-lg flex justify-between items-center transition hover:bg-gray-100">
                                 <div>
-                                    <p className="font-bold text-lg text-gray-800">{reservation.book.title}</p>
+                                    <p className="font-bold text-lg text-gray-800">{reservation.bookTitle}</p>
                                     <p className="text-sm text-gray-500 mt-1">Reserved on: {new Date(reservation.reservationDate).toLocaleDateString()}</p>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -148,8 +159,8 @@ const ProfilePage = () => {
                                         <p className="text-2xl font-bold text-blue-500">{reservation.queuePosition}</p>
                                         <p className="text-sm text-gray-500 ml-2">in queue</p>
                                     </div>
-                                    <ListOrdered className="text-blue-500" />
-                                </div>
+                                    <a href={`/catalog/${reservation.bookId}`} className="text-blue-600 hover:underline">View</a>
+                                 </div>
                             </div>
                         ))}
                     </div>
@@ -168,9 +179,12 @@ const ProfilePage = () => {
                                 <p className="font-bold text-lg text-gray-800">{loan.title}</p>
                                 <p className="text-sm text-gray-500 mt-1">Due: {loan.dueDate}</p>
                             </div>
-                            <div className="flex items-baseline gap-2 text-right">
-                                <p className="text-2xl font-bold text-red-500">{loan.daysLeft}</p>
-                                <p className="text-sm text-gray-500">days left</p>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-baseline text-right">
+                                    <p className="text-2xl font-bold text-red-500">{loan.daysLeft}</p>
+                                    <p className="text-sm text-gray-500">days left</p>
+                                </div>
+                                <button onClick={() => handleReturn(loan.id)} className="text-white bg-green-600 hover:bg-green-700 font-semibold text-sm px-4 py-2 rounded-lg transition-colors">Return</button>
                             </div>
                         </div>
                     ))}

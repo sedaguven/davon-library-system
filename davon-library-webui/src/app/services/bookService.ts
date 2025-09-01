@@ -65,9 +65,12 @@ export const reserveBook = async (userId: number, bookId: number) => {
     try {
         const response = await apiClient.post('/library/reserve', { userId, bookId });
         return response.data;
-    } catch (error) {
-        console.error('Failed to reserve book:', error);
-        throw error;
+    } catch (error: unknown) {
+        const message = (error && typeof error === 'object' && 'message' in error)
+          ? String((error as any).message)
+          : 'Failed to reserve book';
+        console.error('Failed to reserve book:', message);
+        throw new Error(message);
     }
 };
 

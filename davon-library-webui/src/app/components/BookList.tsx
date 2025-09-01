@@ -5,6 +5,8 @@ import Pagination from './Pagination';
 import Link from 'next/link';
 import { AuthContext } from '../context/AuthContext';
 import { Book } from '@/lib/types';
+import { reserveBook } from '../services/bookService';
+import axios from 'axios';
 
 interface BookListProps {
     books: Book[];
@@ -15,6 +17,29 @@ const BookList: React.FC<BookListProps> = ({ books }) => {
   const booksPerPage = 12;
   const authContext = useContext(AuthContext);
   const user = authContext?.user;
+
+  const handleReserve = async (bookId: number) => {
+    if (!user) {
+      alert('Please log in to reserve books.');
+      return;
+    }
+    try {
+      await reserveBook(user.id, bookId);
+      alert('Book reserved successfully!');
+    } catch (error: unknown) {
+      let message = 'Failed to reserve book.';
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const serverMessage = (error.response?.data as any)?.message ?? error.message;
+        if (status === 409) {
+          message = 'You already have an active reservation for this book.';
+        } else if (status === 400) {
+          message = String(serverMessage ?? 'Invalid request.');
+        }
+      }
+      alert(message);
+    }
+  };
 
   const indexOfLastBook = currentPage * booksPerPage;
   const indexOfFirstBook = indexOfLastBook - booksPerPage;
@@ -48,6 +73,14 @@ const BookList: React.FC<BookListProps> = ({ books }) => {
                                                 View Details
                                             </button>
                                         </Link>
+                                        {!book.available && (
+                                          <button
+                                            onClick={() => handleReserve(book.id)}
+                                            className="text-white bg-purple-600 hover:bg-purple-700 font-semibold text-sm px-4 py-2 rounded-lg transition-transform hover:scale-105"
+                                          >
+                                            Reserve
+                                          </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
